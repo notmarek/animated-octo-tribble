@@ -8,6 +8,8 @@
 <body>
   <h1>Express</h1>
   <button id="cringe">Cringe rn</button>
+  <button id="cringe2">Cringe right password</button>
+  <button id="cringe3">Cringe wrong password</button>
   <div id="res"></div>
   <script>
     document.getElementById("cringe").onclick = async () => {
@@ -15,6 +17,23 @@
         method: "POST", headers: {
           "Content-Type": "application/json"
         }, body: JSON.stringify({ username: "marek", password: "heslo", email: "me@notmarek.com" })
+      });
+      document.getElementById("res").innerText = await res.text();
+    }
+
+    document.getElementById("cringe2").onclick = async () => {
+      let res = await fetch("/users/login", {
+        method: "POST", headers: {
+          "Content-Type": "application/json"
+        }, body: JSON.stringify({ username: "marek", password: "heslo", email: "me@notmarek.com" })
+      });
+      document.getElementById("res").innerText = await res.text();
+    }
+    document.getElementById("cringe3").onclick = async () => {
+      let res = await fetch("/users/login", {
+        method: "POST", headers: {
+          "Content-Type": "application/json"
+        }, body: JSON.stringify({ username: "marek", password: "hesfdsfdslo", email: "me@notmarek.com" })
       });
       document.getElementById("res").innerText = await res.text();
     }
