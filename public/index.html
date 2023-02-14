@@ -7,7 +7,18 @@
 
 <body>
   <h1>Express</h1>
-  <p>Welcome to Express</p>
+  <button id="cringe">Cringe rn</button>
+  <div id="res"></div>
+  <script>
+    document.getElementById("cringe").onclick = async () => {
+      let res = await fetch("/users/register", {
+        method: "POST", headers: {
+          "Content-Type": "application/json"
+        }, body: JSON.stringify({ username: "marek", password: "heslo", email: "me@notmarek.com" })
+      });
+      document.getElementById("res").innerText = await res.text();
+    }
+  </script>
 </body>
 
 </html>
