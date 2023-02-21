@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js" 
+import notesRouter from "./routes/notes.js" 
 import http from "http"
 
 let app = express();
@@ -16,6 +17,7 @@ app.use(express.static(path.join('public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/notes', notesRouter);
 
 app.set("secret", new TextEncoder().encode('verysecretkeyusedtosignthejwttoken'))
 app.set('port', 3000);

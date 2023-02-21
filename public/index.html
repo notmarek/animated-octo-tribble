@@ -7,39 +7,95 @@
 
 <body>
   <h1>Express</h1>
-  <button id="cringe">Cringe rn</button>
-  <button id="cringe2">Cringe right password</button>
-  <button id="cringe3">Cringe wrong password</button>
-  <button id="cringe4">you get me</button>
+  <p id="loggedin"></p>
+  <button class="loggedin" onclick="localStorage.removeItem('token'); location.reload()">Logout</button>
+  <button class="loggedin" id="createnote">Create note</button>
+  <form hidden id="transformer">
+    <p id="error" style="color:red;"></p>
+    <p id="success" style="color:green;"></p>
+    <input class="loggedout" hidden type="email" placeholder="email" id="email" />
+    <input class="loggedout" type="text" placeholder="username" id="username" />
+    <input class="loggedout" type="password" placeholder="password" id="passwd" />
+    <textarea class="loggedin" rows="5" cols="80" id="note">
+    </textarea>
+    <input type="submit" />
+
+  </form>
+
+  
+
+
+
+  <button class="loggedin" id="cringe4">Get self</button>.
+  <button class="loggedout" hidden onClick="setupLogin()">Login</button>
+  <button class="loggedout" hidden onClick="setupRegister()">Register</button>
   <div id="res"></div>
   <script>
-    document.getElementById("cringe").onclick = async () => {
-      let res = await fetch("/users/register", {
-        method: "POST", headers: {
-          "Content-Type": "application/json"
-        }, body: JSON.stringify({ username: "marek", password: "heslo", email: "me@notmarek.com" })
-      });
-      document.getElementById("res").innerText = await res.text();
+    const username_el = document.getElementById("username");
+    const passwd_el = document.getElementById("passwd");
+    const email_el = document.getElementById("email");
+    const err_el = document.getElementById("error");
+    const suc_el = document.getElementById("success");
+
+    if (localStorage.getItem("token")) {
+      console.log("hello")
+      document.querySelectorAll(".loggedout").forEach((e) => e.hidden = true);
+      document.querySelectorAll(".loggedin").forEach((e) => e.hidden = false);
+      fetch("/users/me", { method: "get", headers: {authorization: localStorage.getItem("token")}}).then(res=> res.json()).then(data => { if (!data.ok) localStorage.removeItem("token"); else document.getElementById("loggedin").innerText = data.user.username;});
+    }
+    if (!localStorage.getItem("token")) {
+      document.querySelectorAll(".loggedout").forEach((e) => e.hidden = false);
+      document.querySelectorAll(".loggedin").forEach((e) => e.hidden = true);
+    }
+    const setupRegister = () => {
+      let f = document.querySelector("#transformer");
+      f.hidden = false;
+      email_el.hidden = false;
+      console.log(f)
+      f.onsubmit = async (e) => {
+        e.preventDefault();
+        let res = await fetch("/users/register", {
+          method: "POST", headers: {
+            "Content-Type": "application/json"
+          }, body: JSON.stringify({ username: username_el.value, password: passwd_el.value, email: email_el.value })
+        });
+        let data = await res.json()
+        if (!data.ok) {
+          err_el.innerText = data.msg;
+        } else {
+          suc_el.innerText = data.msg;
+          setupLogin();
+        }
+        document.getElementById("res").innerText = JSON.stringify(data);
+        return false;
+      }
+    }
+    const setupLogin = () => {
+      let f = document.querySelector("#transformer");
+      f.hidden = false;
+      email_el.hidden = true;
+      console.log(f)
+      f.onsubmit = async (e) => {
+        e.preventDefault();
+        let res = await fetch("/users/login", {
+          method: "POST", headers: {
+            "Content-Type": "application/json"
+          }, body: JSON.stringify({ username: username_el.value, password: passwd_el.value })
+        });
+        let data = await res.json()
+        if (!data.ok) {
+          err_el.innerText = data.msg;
+        } else {
+          suc_el.innerText = data.msg;
+          localStorage.setItem("token", data.token);
+          location.reload();
+        }
+        document.getElementById("res").innerText =  JSON.stringify(data);
+        return false;
+      }
     }
 
-    document.getElementById("cringe2").onclick = async () => {
-      let res = await fetch("/users/login", {
-        method: "POST", headers: {
-          "Content-Type": "application/json"
-        }, body: JSON.stringify({ username: "marek", password: "heslo", email: "me@notmarek.com" })
-      });
-      let data = await res.json();
-      localStorage.setItem("token", data.token);
-      document.getElementById("res").innerText = JSON.stringify(data);
-    }
-    document.getElementById("cringe3").onclick = async () => {
-      let res = await fetch("/users/login", {
-        method: "POST", headers: {
-          "Content-Type": "application/json"
-        }, body: JSON.stringify({ username: "marek", password: "hesfdsfdslo", email: "me@notmarek.com" })
-      });
-      document.getElementById("res").innerText = await res.text();
-    }
+    
     document.getElementById("cringe4").onclick = async () => {
       let res = await fetch("/users/me", {
         method: "get", headers: {
