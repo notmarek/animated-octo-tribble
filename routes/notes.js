@@ -6,7 +6,7 @@ let router = express.Router();
 router.post('/create', async (req, res, next) => {
     let jwt = req.headers.authorization;
     const secret = req.app.get("secret");
-    let jwt_res = verify_jwt(secret, jwt);
+    let jwt_res = await verify_jwt(secret, jwt);
     if (!jwt_res)
         return res.json({ok: false, msg: "Invalid token"});
     let client = await connPromise;
@@ -18,7 +18,7 @@ router.post('/create', async (req, res, next) => {
 router.get("/all", async (req, res, next) => {
     let jwt = req.headers.authorization;
     const secret = req.app.get("secret");
-    let jwt_res = verify_jwt(secret, jwt);
+    let jwt_res = await verify_jwt(secret, jwt);
     if (!jwt_res)
         return res.json({ok: false, msg: "Invalid token"});
     let client = await connPromise;
@@ -30,16 +30,27 @@ router.get("/all", async (req, res, next) => {
 router.post("/star", async (req, res, next) => {
     let jwt = req.headers.authorization;
     const secret = req.app.get("secret");
-    let jwt_res = verify_jwt(secret, jwt);
+    let jwt_res = await verify_jwt(secret, jwt);
     if (!jwt_res)
         return res.json({ok: false, msg: "Invalid token"});
     let client = await connPromise;
     let collection = client.db("app").collection("notes");
-    let is_starred = (await (await collection.find({ user_id: jwt_res.payload.user_id, _id: req.body.note_id })).first()).important;
-    await collection.updateOne({ user_id: jwt_res.payload.user_id, _id: req.body.note_id }, {important: !is_starred});
+    let is_starred = (await (await collection.find({ _id: req.body.note_id })).first()).important;
+    await collection.updateOne({ _id: req.body.note_id }, { "$set": { important: !is_starred} });
     return res.json({ok: true, msg: "success" }); 
 })
 
+router.post("/delete", async (req, res, next) => {
+    let jwt = req.headers.authorization;
+    const secret = req.app.get("secret");
+    let jwt_res = await verify_jwt(secret, jwt);
+    if (!jwt_res)
+        return res.json({ok: false, msg: "Invalid token"});
+    let client = await connPromise;
+    let collection = client.db("app").collection("notes");
+    await collection.remove({ _id: req.body.note_id });
+    return res.json({ok: true, msg: "success" }); 
+})
 
 
 export default router;

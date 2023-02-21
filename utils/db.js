@@ -93,10 +93,13 @@ export class Collection {
 
     async updateOne(query, updateDoc, options) {
         let key_to_update = Object.keys(updateDoc["$set"])[0];
+        console.log(key_to_update);
         let value_to_update = updateDoc["$set"][key_to_update];
+        console.log(value_to_update);
         Object.keys(query).forEach((key) => {
             for (const entry of this.data[this.db_name][this.collection_name]) {
                 if (entry[key] === query[key]) {
+                    console.log(key);
                     entry[key_to_update] = value_to_update;
                     this.db_file.write(this.data);
                     return;
