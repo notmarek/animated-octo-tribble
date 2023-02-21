@@ -11,7 +11,7 @@ router.post('/create', async (req, res, next) => {
         return res.json({ok: false, msg: "Invalid token"});
     let client = await connPromise;
     let collection = client.db("app").collection("notes");
-    await collection.insertOne({ user_id: jwt_res.payload.user_id, note: req.body.note, important: false });
+    await collection.insertOne({ user_id: jwt_res.payload.user_id, creation_time: Date.now(), title: req.body.title, note: req.body.note, important: false });
     res.json({ok: true, msg: "Note created."});
 });
 

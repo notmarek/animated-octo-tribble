@@ -9,6 +9,7 @@
   <h1>Express</h1>
   <p id="loggedin"></p>
   <button class="loggedin" onclick="localStorage.removeItem('token'); location.reload()">Logout</button>
+  <button class="loggedin" id="deleteaccount">Delete account</button>
   <button class="loggedin" id="createnote">Create note</button>
   <form hidden id="transformer">
     <p id="error" style="color:red;"></p>
@@ -16,15 +17,17 @@
     <input class="loggedout" hidden type="email" placeholder="email" id="email" />
     <input class="loggedout" type="text" placeholder="username" id="username" />
     <input class="loggedout" type="password" placeholder="password" id="passwd" />
+    <input class="loggedin" type="text" placeholder="Note title" id="title" />
     <textarea class="loggedin" rows="5" cols="80" id="note" placeholder="note"></textarea>
     <input type="submit" />
   </form>
 
   <div id="avgnote" hidden>
-    <div class="notetext">Hellelit. Veritatis velobis, accusamus natus culpa quam adipisci labore perferendis deserunt
-      iste officia?</div>
-    <p class="star">*</p>
+    <div><div class="notetitle">Lorem ipsum dolor sit amet.</div> <p style="display: inline;" class="date"></p></div>
+    <p class="star">Favorite</p>
     <p class="del">Delete</p>
+    <div hidden class="notetext">Hellelit. Veritatis velobis, accusamus natus culpa quam adipisci labore perferendis deserunt
+      iste officia?</div>
   </div>
   <div id="notes" class="loggedin">
 
@@ -42,8 +45,20 @@
       display: inline;
     }
 
-    .star.on {
+    .on {
       color: red;
+    }
+    .notetitle {
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: inline;
+
+    }
+    .note {
+      display: flex;
+      background-color: #121212;
+      color:white;
+
     }
   </style>
   <button class="loggedin" id="cringe4">Get self</button>.
@@ -57,7 +72,18 @@
     const err_el = document.getElementById("error");
     const suc_el = document.getElementById("success");
     const note_el = document.getElementById("avgnote");
-
+    document.querySelector("#deleteaccount").onclick = async () => {
+      let password = prompt("Are you sure you want to delete your account? This action is irreversible. Enter your password to confirm.");
+      if (!password) return;
+      await fetch("/users/delete", {
+        method: "POST", headers: {
+          authorization: localStorage.getItem("token"),
+          "Content-Type": "application/json",
+        }, body: JSON.stringify({ password })
+      });
+      localStorage.removeItem("token");
+      location.reload();
+    }
     if (localStorage.getItem("token")) {
       console.log("hello")
       document.querySelectorAll(".loggedout").forEach((e) => e.hidden = true);
@@ -75,13 +101,20 @@
       }).then(res => res.json()).then(data => {
         for (note of data.data) {
           let el = note_el.cloneNode(true);
-          if (note.important)
-            el.querySelector(".star").classList.add("on")
+          if (note.important) {
+            el.querySelector(".star").classList.add("on");
+            el.querySelector(".notetitle").classList.add("on");
+          }
           el.id = note._id;
           el.hidden = false;
           console.log(el)
           document.querySelector("#notes").appendChild(el);
           el.querySelector(".notetext").innerText = note.note;
+          el.querySelector(".notetitle").innerText = note.title;
+          el.querySelector(".notetitle").onclick = () => {
+            el.querySelector(".notetext").hidden = !el.querySelector(".notetext").hidden;
+          }
+          el.querySelector(".date").innerText = new Date(note.creation_time).toLocaleString();
           el.querySelector(".star").onclick = async (e) => {
             await fetch("/notes/star", {
               method: "POST", headers: {
@@ -90,6 +123,7 @@
               }, body: JSON.stringify({ note_id: e.target.parentElement.id })
             });
             e.target.classList.toggle("on");
+            e.target.parentElement.querySelector(".notetitle").classList.toggle("on");
           }
           el.querySelector(".del").onclick = async (e) => {
             await fetch("/notes/delete", {
@@ -156,7 +190,7 @@
       f.hidden = false;
       f.onsubmit = async (e) => {
         e.preventDefault()
-        let res = await fetch("/notes/create", { method: "post", headers: { authorization: localStorage.getItem("token"), "content-type": "application/json" }, body: JSON.stringify({ note: document.querySelector("#note").value }) });
+        let res = await fetch("/notes/create", { method: "post", headers: { authorization: localStorage.getItem("token"), "content-type": "application/json" }, body: JSON.stringify({ note: document.querySelector("#note").value, title: document.querySelector("#title").value }) });
         console.log(res);
         location.reload();
         return false;

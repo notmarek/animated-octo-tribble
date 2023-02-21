@@ -113,6 +113,7 @@ export class Collection {
             for (const entry in this.data[this.db_name][this.collection_name]) {
                 if (this.data[this.db_name][this.collection_name][entry][key] === query[key]) {
                     this.data[this.db_name][this.collection_name].splice(entry, 1)
+                    return this.remove(query);
                 }
             }
         });

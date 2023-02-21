@@ -1,1 +1,1 @@
-{"app":{"users":[{"username":"marek","password":"$argon2id$v=19$m=65536,t=3,p=4$5YI1g4s74F3uEmOlH+dwYA$vUjIyRnwkNPmCDUQcNDUXdVLBAAoXhZJ6WyT0XkGLSE","email":"me@notmarek.com","_id":"83bd6e67-4f20-4a61-a262-3e972017a8a3"}],"notes":[{"user_id":"83bd6e67-4f20-4a61-a262-3e972017a8a3","note":"Hello world #1","important":true,"_id":"059ad774-6a3d-463d-8b9d-d655114b5151"}]}}
+{"app":{"users":[],"notes":[]}}

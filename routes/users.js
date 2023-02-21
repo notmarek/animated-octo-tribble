@@ -42,6 +42,24 @@ router.post("/login", async (req, res, next) => {
   return res.json({ok: true, msg: "Logged in.", token: jwt});
 });
 
+router.post("/delete", async (req, res, next) => {
+  let jwt = req.headers.authorization;
+  const secret = req.app.get("secret");
+  const [ok, data] = await user_from_jwt(secret, jwt);
+  if (!ok)
+    return res.json({ok: false, msg: "Invalid token"});
+  if (!req.body.password)
+    return res.json({ok: false, msg: "No password submitted."});
+  if (!(await argon2.verify(data.password, req.body.password)))
+    return res.json({ok: false, msg: "Wrong password."});
+  let client = await connPromise;
+  let collection = client.db("app").collection("users");
+  await collection.remove({_id: data._id});
+  let collection2 = client.db("app").collection("notes");
+  await collection2.remove({user_id: data._id});
+  return res.json({ok: true, msg: "Account deleted."});
+})
+
 router.get("/me", async (req, res, next) => {
   let jwt = req.headers.authorization;
   const secret = req.app.get("secret");
