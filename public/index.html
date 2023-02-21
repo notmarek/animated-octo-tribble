@@ -19,13 +19,31 @@
     <textarea class="loggedin" rows="5" cols="80" id="note">
     </textarea>
     <input type="submit" />
-
   </form>
 
-  
+  <div id="avgnote" hidden>
+    <div class="note_text">Hellelit. Veritatis velobis, accusamus natus culpa quam adipisci labore perferendis deserunt iste officia?</div>
+    <p class="star">*</p>
+    <p class="del">Delete</p>
+  </div>
+  <div id="notes" class="loggedin">
+
+  </div>
 
 
-
+  <style>
+    .star {
+      cursor: pointer;
+      display: inline;
+    }
+    .del {
+      cursor: pointer;
+      display: inline;
+    }
+    .star.on {
+      color: red;
+    }
+  </style>
   <button class="loggedin" id="cringe4">Get self</button>.
   <button class="loggedout" hidden onClick="setupLogin()">Login</button>
   <button class="loggedout" hidden onClick="setupRegister()">Register</button>
@@ -36,6 +54,7 @@
     const email_el = document.getElementById("email");
     const err_el = document.getElementById("error");
     const suc_el = document.getElementById("success");
+    const note_el = document.getElementById("avgnote");
 
     if (localStorage.getItem("token")) {
       console.log("hello")
@@ -46,6 +65,28 @@
     if (!localStorage.getItem("token")) {
       document.querySelectorAll(".loggedout").forEach((e) => e.hidden = false);
       document.querySelectorAll(".loggedin").forEach((e) => e.hidden = true);
+    } else {
+      let res = await fetch("/notes/all", {
+        method: "GET", headers: {
+          authorization: localStorage.getItem("token")
+        }
+      });
+      let data = res.json();
+      for (note of data.data) {
+        let el = note_el.cloneNode();
+        if (note.important)
+          el.querySelector(".star").classList.add("on")
+        el.id = note._id;
+        el.querySelector(".note_text").innerText = note.note;
+        el.querySelector(".del").onclick = async (e) => {
+          await fetch("/notes/star", { method: "POST", headers: {
+            authorization: localStorage.getItem("token"),
+            "Content-Type": "application/json",
+          }, body: JSON.stringify({ note_id: note._id})});
+          e.target.classList.toggle("on");
+        }
+      }
+      
     }
     const setupRegister = () => {
       let f = document.querySelector("#transformer");
