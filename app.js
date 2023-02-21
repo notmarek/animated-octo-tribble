@@ -5,6 +5,7 @@ import logger from 'morgan';
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js" 
 import http from "http"
+
 let app = express();
 
 app.use(logger('dev'));
@@ -16,7 +17,7 @@ app.use(express.static(path.join('public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-
+app.set("secret", new TextEncoder().encode('verysecretkeyusedtosignthejwttoken'))
 app.set('port', 3000);
 let server = http.createServer(app);
 server.listen(app.get("port"));
